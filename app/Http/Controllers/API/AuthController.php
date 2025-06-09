@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
 class AuthController extends Controller
 {
@@ -28,6 +29,22 @@ class AuthController extends Controller
             return response()->json(['message' => 'Successfully logged out']);
         } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
             return response()->json(['error' => 'Failed to logout, please try again'], 500);
+        }
+    }
+
+    public function refresh()
+    {
+        try {
+            $newToken = JWTAuth::parseToken()->refresh(); // Buat token baru dari token lama
+
+            return response()->json([
+                'access_token' => $newToken,
+                'token_type'   => 'bearer',
+                'expires_in'   => auth('api')->factory()->getTTL() * 60,
+            ]);
+
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token tidak valid atau sudah kedaluwarsa'], 401);
         }
     }
 
