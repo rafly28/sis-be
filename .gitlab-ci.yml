@@ -12,22 +12,13 @@ notify_telegram:
       fi
 
       COMMIT_ID="$CI_COMMIT_SHORT_SHA"
-      COMMIT_MSG="$CI_COMMIT_MESSAGE"
+      COMMIT_MSG=$(echo "$CI_COMMIT_MESSAGE" | sed 's/"/\\"/g')
       PROJECT_NAME="$CI_PROJECT_NAME"
-      PIPELINE_URL="$CI_PIPELINE_URL"
 
-      MESSAGE=$(cat <<EOF
-🚀<b>New $EVENT_TYPE</b>
-<b>Project</b>     : $PROJECT_NAME
-<b>Commit ID</b>   : <code>$COMMIT_ID</code>
-<b>Commit Msg</b>  : $COMMIT_MSG
-EOF
-      )
-
-      ESCAPED_MESSAGE=$(echo "$MESSAGE" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
+      MESSAGE="🚀<b>New $EVENT_TYPE</b>\n<b>Project</b>     : $PROJECT_NAME\n<b>Commit ID</b>   : <code>$COMMIT_ID</code>\n<b>Commit Msg</b>  : $COMMIT_MSG"
 
       curl -s -X POST -H 'Content-Type: application/json' \
-        -d "{\"chat_id\": \"-1002336929122_4\", \"message_thread_id\": 4, \"text\": \"$ESCAPED_MESSAGE\", \"parse_mode\": \"HTML\"}" \
+        -d "{\"chat_id\": \"-1002336929122\", \"message_thread_id\": 4, \"text\": \"$MESSAGE\", \"parse_mode\": \"HTML\"}" \
         https://api.telegram.org/bot7494741116:AAFCtf_b4j5XunhQ_v524lT0gyqDpMba_ew/sendMessage
   only:
     - branches
