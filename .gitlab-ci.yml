@@ -1,0 +1,40 @@
+stages:
+  - notify
+
+notify_telegram:
+  stage: notify
+  script:
+    - |
+      # Deteksi jenis event (Push vs Merge)
+      if [[ "$CI_COMMIT_MESSAGE" == *"Merge branch"* || "$CI_COMMIT_MESSAGE" == *"Merge remote-tracking branch"* ]]; then
+        EVENT_TYPE="Merge"
+      else
+        EVENT_TYPE="Push"
+      fi
+
+      # Ambil data untuk notifikasi
+      COMMIT_ID="$CI_COMMIT_SHORT_SHA"
+      COMMIT_MSG="$CI_COMMIT_MESSAGE"
+      PROJECT_NAME="$CI_PROJECT_NAME"
+      PIPELINE_URL="$CI_PIPELINE_URL"
+
+      # Format pesan dengan escape karakter
+      MESSAGE=$(cat <<EOF
+🚀<b>New $EVENT_TYPE</b>
+<b>Project</b>     : $PROJECT_NAME
+<b>Commit ID</b>   : <code>$COMMIT_ID</code>
+<b>Commit Msg</b>  : $COMMIT_MSG
+<a href="$PIPELINE_URL">🔗 View Pipeline</a>
+EOF
+      )
+
+      # Encode JSON-safe (replace newlines with \n and escape double quotes)
+      ESCAPED_MESSAGE=$(echo "$MESSAGE" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
+
+      # Kirim ke Telegram dengan JSON payload
+      curl -s -X POST -H 'Content-Type: application/json' \
+        -d "{\"chat_id\": \"-1002336929122\", \"message_thread_id\": 4, \"text\": \"$ESCAPED_MESSAGE\", \"parse_mode\": \"HTML\"}" \
+        https://api.telegram.org/bot7494741116:AAFCtf_b4j5XunhQ_v524lT0gyqDpMba_ew/sendMessage
+  only:
+    - branches
+  when: on_success
