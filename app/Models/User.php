@@ -56,4 +56,15 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    // Relation orang tua dan murid
+    public function orangTua()
+    {
+        return $this->hasOne(OrangTua::class);
+    }
+
+    public function murid()
+    {
+        return $this->hasOne(Murid::class);
+    }
 }
