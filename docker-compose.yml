@@ -1,31 +1,33 @@
 services:
-  api:
-    image: docker.io/rafly28/fly-dev
-    container_name: lara_api
-    restart: unless-stopped
-    ports:
-      - "3000:80"
-    volumes:
-      - ./:/var/www/html/
-    networks:
-      default:
-        ipv4_address: 10.89.0.2
-    depends on: db
-  db:
-    image: docker.io/library/mysql:8.2.0
-    container_name: mysql
-    ports:
-      - "3306:3306"
-    volumes:
-      - /home/rafly/file_sampis/mysql:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=laravel123
-      - MYSQL_DATABASE=sis
-      - MYSQL_SSL_MODE=DISABLED
-    networks:
-      default:
-        ipv4_address: 10.89.0.3
+    api:
+        image: docker.io/rafly28/fly-dev:php-api
+        container_name: lara_api
+        restart: unless-stopped
+        environment:
+            - TIMEZONE=Asia/Jakarta
+        ports:
+            - "3000:80"
+        volumes:
+            - ./:/var/www/html/
+        networks:
+            default:
+                ipv4_address: 10.89.0.2
+        depends on: db
+    db:
+        image: docker.io/library/mysql:8.2.0
+        container_name: mysql
+        ports:
+            - "3306:3306"
+        volumes:
+            - /home/rafly/file_sampis/mysql:/var/lib/mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=laravel123
+            - MYSQL_DATABASE=sis
+            - MYSQL_SSL_MODE=DISABLED
+        networks:
+            default:
+                ipv4_address: 10.89.0.3
 networks:
-  default:
-    name: sis-fe_default
-    external: true
+    default:
+        name: sis-fe_default
+        external: true

@@ -35,7 +35,7 @@ class AuthController extends Controller
     public function refresh()
     {
         try {
-            $newToken = JWTAuth::parseToken()->refresh(); // Buat token baru dari token lama
+            $newToken = JWTAuth::parseToken()->refresh();
 
             return response()->json([
                 'access_token' => $newToken,
@@ -61,5 +61,22 @@ class AuthController extends Controller
         ]);
     }
 
+    protected function register(Request $request)
+    {
+        $request->validate([
+        'name'     => 'required|string|max:255',
+        'username' => 'required|string|unique:users,username',
+        'role'     => 'required|in:admin,guru,murid,orang_tua',
+        'email'    => 'required|email|unique:users,email',
+        'password' => 'required|string|min:6',
+        ]);
 
+        $user = User::create([
+        'name'     => $request->name,
+        'username' => $request->username,
+        'role'     => $request->role,
+        'email'    => $request->email,
+        'password' => bcrypt($request->password),
+        ]);
+    }
 }
