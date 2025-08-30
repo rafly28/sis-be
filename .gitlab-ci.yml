@@ -18,7 +18,7 @@ notify_telegram:
       MESSAGE="🚀<b>New $EVENT_TYPE</b>\n<b>Project</b>     : $PROJECT_NAME\n<b>Commit ID</b>   : <code>$COMMIT_ID</code>\n<b>Commit Msg</b>  : $COMMIT_MSG"
 
       curl -s -X POST -H 'Content-Type: application/json' \
-        -d "{\"chat_id\": \"-1002336929122\", \"message_thread_id\": 4, \"text\": \"$MESSAGE\", \"parse_mode\": \"HTML\"}" \
+        -d "{\"chat_id\": \"-1002336929122_4\", \"message_thread_id\": 4, \"text\": \"$MESSAGE\", \"parse_mode\": \"HTML\"}" \
         https://api.telegram.org/bot7494741116:AAFCtf_b4j5XunhQ_v524lT0gyqDpMba_ew/sendMessage
   only:
     - branches
