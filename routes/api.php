@@ -14,11 +14,29 @@ use App\Http\Controllers\API\AuthController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-// Logic Login
-Route::post('/login', [AuthController::class, 'login']);
-Route::middleware('auth:api')->post('/logout', [AuthController::class, 'logout']);
-Route::middleware('auth:api')->post('/refresh', [AuthController::class, 'refresh']);
+// Old Logic Login
+// Route::post('/login', [AuthController::class, 'login']);
+// Route::middleware('auth:api')->post('/logout', [AuthController::class, 'logout']);
+// Route::middleware('auth:api')->post('/refresh', [AuthController::class, 'refresh']);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+
+// New Logic
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login',    [AuthController::class, 'login']);
+Route::middleware(['auth:api'])->group(function () {
+    Route::post('/logout',   [AuthController::class, 'logout']);
+    Route::post('/refresh',  [AuthController::class, 'refresh']);
+
+    // Contoh route untuk cek user login + role/permission
+    Route::get('/me', function () {
+        $user = auth()->user();
+        return response()->json([
+            'user'        => $user->only(['id','name','username','email']),
+            'roles'       => $user->getRoleNames(),
+            'permissions' => $user->getAllPermissions()->pluck('name'),
+        ]);
+    });
 });
