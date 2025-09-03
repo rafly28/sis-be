@@ -39,7 +39,7 @@ class AuthController extends Controller
         $user->assignRole($request->role);
 
         return response()->json([
-            'message' => 'User berhasil di daftarkan',
+            'message' => 'Successfully add users',
             'user'    => [
                 'id'          => $user->id,
                 'name'        => $user->name,
@@ -65,9 +65,14 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type'   => 'bearer',
             'expires_in'   => auth('api')->factory()->getTTL() * 60,
-            'user'         => $user->only(['id', 'name', 'username']),
-            'roles'        => $user->getRoleNames(),      // array roles
-            'permissions'  => $user->getAllPermissions()->pluck('name'), // array permissions
+            'user' => [
+                'id'          => $user->id,
+                'name'        => $user->name,
+                'email'       => $user->email,
+                'username'    => $user->username,
+                'roles'       => $user->getRoleNames(),
+                'permissions' => $user->getAllPermissions()->pluck('name'),
+            ]
         ]);
 
         // return $this->respondWithToken($token);

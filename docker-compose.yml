@@ -1,6 +1,6 @@
 services:
   api:
-    image: docker.io/rafly28/fly-dev
+    image: rafly28/fly-dev:php-api-mysql-2
     container_name: lara_api
     restart: unless-stopped
     ports:
