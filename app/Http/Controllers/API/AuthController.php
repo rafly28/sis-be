@@ -8,9 +8,49 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
+            'username' => 'required|string|max:255|unique:users',
+            'password' => 'required|string|min:6',
+            'role'     => 'required|string|exists:roles,name', // contoh: admin, guru, murid, orang_tua
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $user = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'username' => $request->username,
+            'password' => Hash::make($request->password),
+        ]);
+
+        // 🔹 Assign role dari Spatie
+        $user->assignRole($request->role);
+
+        return response()->json([
+            'message' => 'Successfully add users',
+            'user'    => [
+                'id'          => $user->id,
+                'name'        => $user->name,
+                'email'       => $user->email,
+                'username'    => $user->username,
+                'roles'       => $user->getRoleNames(),
+                'permissions' => $user->getAllPermissions()->pluck('name'),
+            ],
+        ], 201);
+    }
+
     public function login(Request $request)
     {
         $credentials = $request->only('username', 'password');
@@ -19,7 +59,23 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        return $this->respondWithToken($token);
+        $user = auth()->user();
+
+        return response()->json([
+            'access_token' => $token,
+            'token_type'   => 'bearer',
+            'expires_in'   => auth('api')->factory()->getTTL() * 60,
+            'user' => [
+                'id'          => $user->id,
+                'name'        => $user->name,
+                'email'       => $user->email,
+                'username'    => $user->username,
+                'roles'       => $user->getRoleNames(),
+                'permissions' => $user->getAllPermissions()->pluck('name'),
+            ]
+        ]);
+
+        // return $this->respondWithToken($token);
     }
 
     public function logout()
@@ -50,14 +106,15 @@ class AuthController extends Controller
 
     protected function respondWithToken($token)
     {
+        $user = auth()->user();
+
         return response()->json([
             'access_token' => $token,
             'token_type'   => 'bearer',
             'expires_in'   => auth('api')->factory()->getTTL() * 60,
-            'username'     => auth()->user()->username,
-            'name'         => auth()->user()->name, 
-            'user_email'   => auth()->user()->email,
-            'role'         => auth()->user()->role
+            'user'         => $user->only(['id', 'name', 'username']),
+            'roles'        => $user->getRoleNames(),
+            'permissions'  => $user->getAllPermissions()->pluck('name'),
         ]);
     }
 
