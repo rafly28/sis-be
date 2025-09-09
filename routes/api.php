@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,4 +40,8 @@ Route::middleware(['auth:api'])->group(function () {
             'permissions' => $user->getAllPermissions()->pluck('name'),
         ]);
     });
+});
+
+Route::middleware(['auth:api'])->group(function () {
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);
 });
