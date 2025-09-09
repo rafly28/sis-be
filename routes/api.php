@@ -32,14 +32,18 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/refresh',  [AuthController::class, 'refresh']);
 
     // Contoh route untuk cek user login + role/permission
-    Route::get('/me', function () {
-        $user = auth()->user();
-        return response()->json([
-            'user'        => $user->only(['id','name','username','email']),
-            'roles'       => $user->getRoleNames(),
-            'permissions' => $user->getAllPermissions()->pluck('name'),
-        ]);
-    });
+    // Route::get('/me', function () {
+    //     $user = auth()->user();
+    //     return response()->json([
+    //         'user'        => $user->only(['id','name','username','email']),
+    //         'roles'       => $user->getRoleNames(),
+    //         'permissions' => $user->getAllPermissions()->pluck('name'),
+    //     ]);
+    // });
+});
+
+Route::middleware('auth:api')->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
 });
 
 // CRUD Users

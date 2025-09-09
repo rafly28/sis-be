@@ -111,14 +111,24 @@ class UserController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $user->update([
-            'name'     => $request->name ?? $user->name,
-            'email'    => $request->email ?? $user->email,
-            'username' => $request->username ?? $user->username,
-            'password' => $request->filled('password') ? Hash::make($request->password) : $user->password,
-        ]);
+        // Update field yang dikirim saja
+        if ($request->filled('name')) {
+            $user->name = $request->name;
+        }
+        if ($request->filled('email')) {
+            $user->email = $request->email;
+        }
+        if ($request->filled('username')) {
+            $user->username = $request->username;
+        }
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
 
-        if ($request->filled('role')) {
+        $user->save();
+
+        // Role hanya boleh diubah admin
+        if ($request->filled('role') && $authUser->hasRole('admin')) {
             $user->syncRoles([$request->role]);
         }
 
@@ -141,5 +151,4 @@ class UserController extends Controller
 
         return response()->json(['error' => 'Unauthorized'], 403);
     }
-
 }

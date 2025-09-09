@@ -117,4 +117,17 @@ class AuthController extends Controller
             'permissions'  => $user->getAllPermissions()->pluck('name'),
         ]);
     }
+
+    protected function me(Request $request)
+    {
+        $user = $request->user();
+
+        return response()->json([
+            'id'            =>  $user->id,
+            'name'          =>  $user->name,
+            'username'      =>  $user->username,
+            'roles'         =>  $user->getRoleNames(),
+            'permissions'   =>  $user->getAllPermissions()->pluck('name'),
+        ]);
+    }
 }
